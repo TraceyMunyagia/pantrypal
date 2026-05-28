@@ -1,18 +1,79 @@
-# pantrypal
+# 🍳 PantryPal AI
 
-A new Flutter project.
+PantryPal AI is an AI-powered Flutter recipe assistant that helps users generate recipes, create meal plans, and share cooking results using smart chatbot technology.
 
-## Getting Started
+Built with Flutter and AI APIs, PantryPal AI transforms simple ingredients into delicious meal ideas instantly.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+# ✨ Features
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## 🤖 AI Recipe Generator
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# pantrypal
+Generate recipes instantly using ingredients you already have at home.
+
+Example:
+
+* eggs
+* onions
+* tomatoes
+
+→ PantryPal AI creates a full recipe with cooking steps.
+
+---
+
+## 📅 AI Meal Planner
+
+Create personalized meal plans based on:
+
+* dietary goals,
+* available ingredients,
+* budget,
+* and cuisine preferences.
+
+---
+
+## 📸 Recipe Sharing with Food Photos
+
+Users can:
+
+1. Generate recipes
+2. Cook meals
+3. Take photos of finished dishes
+4. Share both the recipe and cooking results
+
+---
+
+## ❤️ Save Favorite Recipes
+
+Store and revisit your favorite meals anytime.
+
+---
+
+## 🌙 Dark Mode
+
+Modern orange-and-white UI with optional dark theme support.
+
+---
+
+# 📱 Screens
+
+* Splash Screen
+* Home Screen
+* AI Chat Screen
+* Meal Planner Screen
+* Favorites Screen
+* Recipe Sharing Screen
+* Settings Screen
+
+---
+
+# 🛠 Tech Stack
+
+| Technology | Usage                |
+| ---------- | -------------------- |
+| Flutter    | Frontend Framework   |
+| Dart       | Programming Language |
+| Gemini API | AI Recipe Generation |
+| Provider   | State Management     |
+| Shared     |                      |
