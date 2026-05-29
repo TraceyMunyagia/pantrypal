@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return Scaffold(
           appBar: AppBar(
             title: const Text(
-              'PantryPal AI',
+              'PantryPal ',
               style: TextStyle(fontWeight: FontWeight.w800),
             ),
             actions: [
