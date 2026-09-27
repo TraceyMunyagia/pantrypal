@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as speech_to_text;
 
-import '../providers/recipe_provider.dart';
-import '../providers/theme_provider.dart';
-import '../widgets/chat_bubble.dart';
-import '../widgets/typing_indicator.dart';
-import 'cooking_gallery_screen.dart';
-import 'recipe_result_screen.dart';
+import '../../providers/recipe_provider.dart';
+import '../../core/theme/theme_provider.dart';
+import '../../widgets/chat_bubble.dart';
+import '../../widgets/typing_indicator.dart';
+import '../sharing/cooking_gallery_screen.dart';
+import '../favorites/favorites_screen.dart';
+import '../meal_planner/meal_planner_screen.dart';
+import '../settings/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -130,11 +132,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.favorite),
               ),
               IconButton(
+                tooltip: 'Weekly Meal Planner',
+                onPressed: () => Navigator.of(
+                  context,
+                ).pushNamed(MealPlannerScreen.routeName),
+                icon: const Icon(Icons.calendar_month_outlined),
+              ),
+              IconButton(
                 tooltip: 'Cooking gallery',
                 onPressed: () => Navigator.of(
                   context,
                 ).pushNamed(CookingGalleryScreen.routeName),
                 icon: const Icon(Icons.photo_library_outlined),
+              ),
+              IconButton(
+                tooltip: 'Profile',
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(ProfileScreen.routeName),
+                icon: const Icon(Icons.person_outline),
               ),
             ],
           ),

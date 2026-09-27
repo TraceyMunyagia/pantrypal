@@ -1,23 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'providers/cooking_post_provider.dart';
 import 'providers/recipe_provider.dart';
 import 'providers/meal_plan_provider.dart';
-import 'providers/theme_provider.dart';
-import 'screens/cooking_gallery_screen.dart';
-import 'screens/cooking_post_preview_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/meal_planner_screen.dart';
-import 'screens/recipe_result_screen.dart';
-import 'screens/splash_screen.dart';
+import 'core/theme/theme_provider.dart';
+import 'screens/auth/forgot_password_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/signup_screen.dart';
+import 'screens/sharing/cooking_gallery_screen.dart';
+import 'screens/sharing/share_recipe_screen.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/meal_planner/meal_planner_screen.dart';
+import 'screens/favorites/favorites_screen.dart';
+import 'screens/settings/profile_screen.dart';
+import 'screens/splash/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
+
+  await dotenv.load(fileName: '.env');
+
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
+  );
+
   runApp(const PantryPalApp());
 }
+
+final supabase = Supabase.instance.client;
 
 class PantryPalApp extends StatelessWidget {
   const PantryPalApp({super.key});
@@ -42,6 +56,11 @@ class PantryPalApp extends StatelessWidget {
             initialRoute: SplashScreen.routeName,
             routes: {
               SplashScreen.routeName: (_) => const SplashScreen(),
+              LoginScreen.routeName: (_) => const LoginScreen(),
+              SignupScreen.routeName: (_) => const SignupScreen(),
+              ForgotPasswordScreen.routeName: (_) =>
+                  const ForgotPasswordScreen(),
+              ProfileScreen.routeName: (_) => const ProfileScreen(),
               HomeScreen.routeName: (_) => const HomeScreen(),
               MealPlannerScreen.routeName: (_) => const MealPlannerScreen(),
               RecipeResultScreen.routeName: (_) => const RecipeResultScreen(),

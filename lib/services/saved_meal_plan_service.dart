@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/meal_plan.dart';
+import '../models/meal_plan_model.dart';
 
 class SavedMealPlanService {
   static const _mealPlansKey = 'saved_meal_plans';

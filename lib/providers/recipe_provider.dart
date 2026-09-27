@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import '../models/chat_message.dart';
-import '../models/recipe.dart';
-import '../services/ai_recipe_service.dart';
+import '../models/message_model.dart';
+import '../models/recipe_model.dart';
+import '../services/gemini_service.dart';
 import '../services/saved_recipe_service.dart';
 
 class RecipeProvider extends ChangeNotifier {

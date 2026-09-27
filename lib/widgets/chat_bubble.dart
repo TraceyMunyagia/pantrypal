@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/chat_message.dart';
+import '../models/message_model.dart';
 import 'recipe_card.dart';
 
 class ChatBubble extends StatelessWidget {

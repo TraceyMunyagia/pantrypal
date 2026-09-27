@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/cooking_post.dart';
-import '../providers/cooking_post_provider.dart';
+import '../../models/cooking_post.dart';
+import '../../providers/cooking_post_provider.dart';
 
 class CookingPostPreviewScreen extends StatelessWidget {
   const CookingPostPreviewScreen({super.key});

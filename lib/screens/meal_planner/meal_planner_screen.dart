@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../models/meal_plan.dart';
-import '../providers/meal_plan_provider.dart';
-import '../providers/theme_provider.dart';
-import 'home_screen.dart';
+import '../../models/meal_plan_model.dart';
+import '../../providers/meal_plan_provider.dart';
+import '../../core/theme/theme_provider.dart';
+import '../home/home_screen.dart';
 
 class MealPlannerScreen extends StatefulWidget {
   const MealPlannerScreen({super.key});
@@ -18,55 +18,86 @@ class MealPlannerScreen extends StatefulWidget {
 
 class _MealPlannerScreenState extends State<MealPlannerScreen>
     with SingleTickerProviderStateMixin {
-  static const _preferenceOptions = [
-    'Vegetarian',
-    'High protein',
-    'Keto',
-    'Budget meals',
-  ];
+  static const _categories = {
+    'breakfast': ('🍳', 'Breakfast'),
+    'protein': ('🥩', 'Proteins'),
+    'carb': ('🍚', 'Carbs'),
+    'vegetable': ('🥬', 'Vegetables'),
+  };
 
-  final _ingredientsController = TextEditingController();
-  final _goalController = TextEditingController(text: 'Muscle gain');
-  final _budgetController = TextEditingController(text: 'Low');
+  final Map<String, List<String>> _foodBank = {
+    'breakfast': ['Eggs', 'Bread', 'Porridge', 'Mandazi'],
+    'protein': ['Minced meat', 'Chicken', 'Beans'],
+    'carb': ['Ugali', 'Rice', 'Mashed potatoes', 'Chapati'],
+    'vegetable': ['Cabbage', 'Sukuma wiki', 'Kachumbari', 'Spinach'],
+  };
   late final TabController _tabController;
-  int _durationDays = 7;
-  final Set<String> _preferences = {'High protein', 'Budget meals'};
+  bool _avoidRepeats = true;
 
   @override
   void initState() {
     super.initState();
-    _ingredientsController.text = 'rice, chicken, vegetables';
     _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
   void dispose() {
-    _ingredientsController.dispose();
-    _goalController.dispose();
-    _budgetController.dispose();
     _tabController.dispose();
     super.dispose();
   }
 
   Future<void> _generatePlan(MealPlanProvider provider) async {
-    final ingredients = _ingredientsController.text
-        .split(',')
-        .map((ingredient) => ingredient.trim())
-        .where((ingredient) => ingredient.isNotEmpty)
-        .toList();
-
-    await provider.generatePlan(
-      MealPlanRequest(
-        durationDays: _durationDays,
-        preferences: _preferences.toList(),
-        ingredients: ingredients,
-        goal: _goalController.text.trim(),
-        budget: _budgetController.text.trim(),
-      ),
+    await provider.generateFoodBankPlan(
+      foodBank: _foodBank,
+      avoidRepeats: _avoidRepeats,
     );
 
     if (!mounted) return;
     _tabController.animateTo(0);
+  }
+
+  Future<void> _remixPlan(MealPlanProvider provider) async {
+    await provider.generateFoodBankPlan(
+      foodBank: _foodBank,
+      remix: true,
+      avoidRepeats: _avoidRepeats,
+    );
+    if (!mounted) return;
+    _tabController.animateTo(0);
+  }
+
+  Future<void> _addFood(String category) async {
+    final controller = TextEditingController();
+    final food = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Add ${_categories[category]!.$2} food'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(hintText: 'e.g. Rice'),
+          onSubmitted: (value) => Navigator.pop(context, value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (!mounted || food == null || food.trim().isEmpty) return;
+    setState(() => _foodBank[category]!.add(food.trim()));
+  }
+
+  void _removeFood(String category, String food) {
+    setState(() => _foodBank[category]!.remove(food));
   }
 
   Future<void> _copyShareText(String value, String message) async {
@@ -134,27 +165,18 @@ class _MealPlannerScreenState extends State<MealPlannerScreen>
                         controller: _tabController,
                         children: [
                           _PlanTab(
-                            durationDays: _durationDays,
-                            preferences: _preferences,
-                            preferenceOptions: _preferenceOptions,
-                            ingredientsController: _ingredientsController,
-                            goalController: _goalController,
-                            budgetController: _budgetController,
+                            foodBank: _foodBank,
+                            categories: _categories,
+                            avoidRepeats: _avoidRepeats,
                             provider: provider,
-                            onDurationChanged: (value) {
-                              if (value == null) return;
-                              setState(() => _durationDays = value);
-                            },
-                            onPreferenceSelected: (preference, selected) {
-                              setState(() {
-                                if (selected) {
-                                  _preferences.add(preference);
-                                } else {
-                                  _preferences.remove(preference);
-                                }
-                              });
-                            },
+                            onAvoidRepeatsChanged: (value) =>
+                                setState(() => _avoidRepeats = value),
+                            onAddFood: _addFood,
+                            onRemoveFood: _removeFood,
                             onGenerate: () => _generatePlan(provider),
+                            onRemix: provider.currentPlan == null
+                                ? null
+                                : () => _remixPlan(provider),
                             onSave: provider.saveCurrentPlan,
                             onShare: provider.currentPlan == null
                                 ? null
@@ -198,30 +220,28 @@ class _MealPlannerScreenState extends State<MealPlannerScreen>
 
 class _PlanTab extends StatelessWidget {
   const _PlanTab({
-    required this.durationDays,
-    required this.preferences,
-    required this.preferenceOptions,
-    required this.ingredientsController,
-    required this.goalController,
-    required this.budgetController,
+    required this.foodBank,
+    required this.categories,
+    required this.avoidRepeats,
     required this.provider,
-    required this.onDurationChanged,
-    required this.onPreferenceSelected,
+    required this.onAvoidRepeatsChanged,
+    required this.onAddFood,
+    required this.onRemoveFood,
     required this.onGenerate,
+    required this.onRemix,
     required this.onSave,
     required this.onShare,
   });
 
-  final int durationDays;
-  final Set<String> preferences;
-  final List<String> preferenceOptions;
-  final TextEditingController ingredientsController;
-  final TextEditingController goalController;
-  final TextEditingController budgetController;
+  final Map<String, List<String>> foodBank;
+  final Map<String, (String, String)> categories;
+  final bool avoidRepeats;
   final MealPlanProvider provider;
-  final ValueChanged<int?> onDurationChanged;
-  final void Function(String preference, bool selected) onPreferenceSelected;
+  final ValueChanged<bool> onAvoidRepeatsChanged;
+  final ValueChanged<String> onAddFood;
+  final void Function(String, String) onRemoveFood;
   final VoidCallback onGenerate;
+  final VoidCallback? onRemix;
   final VoidCallback onSave;
   final VoidCallback? onShare;
 
@@ -233,16 +253,15 @@ class _PlanTab extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         _PlannerForm(
-          durationDays: durationDays,
-          preferences: preferences,
-          preferenceOptions: preferenceOptions,
-          ingredientsController: ingredientsController,
-          goalController: goalController,
-          budgetController: budgetController,
+          foodBank: foodBank,
+          categories: categories,
+          avoidRepeats: avoidRepeats,
           isLoading: provider.isLoading,
-          onDurationChanged: onDurationChanged,
-          onPreferenceSelected: onPreferenceSelected,
+          onAvoidRepeatsChanged: onAvoidRepeatsChanged,
+          onAddFood: onAddFood,
+          onRemoveFood: onRemoveFood,
           onGenerate: onGenerate,
+          onRemix: onRemix,
         ),
         const SizedBox(height: 16),
         if (plan == null)
@@ -250,7 +269,7 @@ class _PlanTab extends StatelessWidget {
             icon: Icons.calendar_month,
             title: 'Configure a custom meal plan',
             body:
-                'Choose a duration, preferences, ingredients, goal, and budget, then generate your plan.',
+                'Add your usual foods and let PantryPal create combinations for the week.',
           )
         else
           _MealPlanView(plan: plan, onSave: onSave, onShare: onShare),
@@ -261,28 +280,26 @@ class _PlanTab extends StatelessWidget {
 
 class _PlannerForm extends StatelessWidget {
   const _PlannerForm({
-    required this.durationDays,
-    required this.preferences,
-    required this.preferenceOptions,
-    required this.ingredientsController,
-    required this.goalController,
-    required this.budgetController,
+    required this.foodBank,
+    required this.categories,
+    required this.avoidRepeats,
     required this.isLoading,
-    required this.onDurationChanged,
-    required this.onPreferenceSelected,
+    required this.onAvoidRepeatsChanged,
+    required this.onAddFood,
+    required this.onRemoveFood,
     required this.onGenerate,
+    required this.onRemix,
   });
 
-  final int durationDays;
-  final Set<String> preferences;
-  final List<String> preferenceOptions;
-  final TextEditingController ingredientsController;
-  final TextEditingController goalController;
-  final TextEditingController budgetController;
+  final Map<String, List<String>> foodBank;
+  final Map<String, (String, String)> categories;
+  final bool avoidRepeats;
   final bool isLoading;
-  final ValueChanged<int?> onDurationChanged;
-  final void Function(String preference, bool selected) onPreferenceSelected;
+  final ValueChanged<bool> onAvoidRepeatsChanged;
+  final ValueChanged<String> onAddFood;
+  final void Function(String, String) onRemoveFood;
   final VoidCallback onGenerate;
+  final VoidCallback? onRemix;
 
   @override
   Widget build(BuildContext context) {
@@ -294,87 +311,105 @@ class _PlannerForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Build your food list',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Choose the foods you already have. PantryPal will remix them into weekly combinations.',
+            ),
+            const SizedBox(height: 16),
+            ...categories.entries.map((entry) {
+              final foods = foodBank[entry.key] ?? [];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${entry.value.$1}  ${entry.value.$2}',
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 2,
+                              children: foods
+                                  .map(
+                                    (food) => InputChip(
+                                      label: Text(food),
+                                      onDeleted: isLoading
+                                          ? null
+                                          : () => onRemoveFood(entry.key, food),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: isLoading
+                                ? null
+                                : () => onAddFood(entry.key),
+                            icon: const Icon(Icons.add),
+                            tooltip: 'Add food',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Avoid identical combinations'),
+              subtitle: const Text(
+                'Use different combinations from previous weeks when possible.',
+              ),
+              value: avoidRepeats,
+              onChanged: isLoading ? null : onAvoidRepeatsChanged,
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: durationDays,
-                    decoration: const InputDecoration(
-                      labelText: 'Meal duration',
-                      prefixIcon: Icon(Icons.date_range),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 1, child: Text('1 day')),
-                      DropdownMenuItem(value: 3, child: Text('3 days')),
-                      DropdownMenuItem(value: 7, child: Text('7 days')),
-                    ],
-                    onChanged: isLoading ? null : onDurationChanged,
+                  child: FilledButton.icon(
+                    onPressed: isLoading ? null : onGenerate,
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.auto_awesome),
+                    label: const Text('Generate Weekly Plan'),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: budgetController,
-                    enabled: !isLoading,
-                    decoration: const InputDecoration(
-                      labelText: 'Budget',
-                      prefixIcon: Icon(Icons.savings_outlined),
-                    ),
+                if (onRemix != null) ...[
+                  const SizedBox(width: 8),
+                  FilledButton.tonalIcon(
+                    onPressed: isLoading ? null : onRemix,
+                    icon: const Icon(Icons.auto_fix_high),
+                    label: const Text('Remix'),
                   ),
-                ),
+                ],
               ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: goalController,
-              enabled: !isLoading,
-              decoration: const InputDecoration(
-                labelText: 'Goal',
-                prefixIcon: Icon(Icons.flag_outlined),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: ingredientsController,
-              enabled: !isLoading,
-              minLines: 2,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: 'Ingredients',
-                hintText: 'rice, chicken, vegetables',
-                prefixIcon: Icon(Icons.kitchen_outlined),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: preferenceOptions.map((preference) {
-                final selected = preferences.contains(preference);
-                return FilterChip(
-                  label: Text(preference),
-                  selected: selected,
-                  avatar: Icon(selected ? Icons.check : Icons.add, size: 18),
-                  onSelected: isLoading
-                      ? null
-                      : (value) => onPreferenceSelected(preference, value),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: isLoading ? null : onGenerate,
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.auto_awesome),
-              label: const Text('Generate Plan'),
             ),
           ],
         ),

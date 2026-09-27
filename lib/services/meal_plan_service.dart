@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/meal_plan.dart';
+import '../models/meal_plan_model.dart';
 
 class AiMealPlanService {
   Future<MealPlan> generateMealPlan(MealPlanRequest request) async {

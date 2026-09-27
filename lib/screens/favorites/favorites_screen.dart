@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/recipe_provider.dart';
-import '../providers/theme_provider.dart';
-import '../widgets/recipe_card.dart';
-import 'cooking_gallery_screen.dart';
+import '../../providers/recipe_provider.dart';
+import '../../core/theme/theme_provider.dart';
+import '../../widgets/recipe_card.dart';
+import '../sharing/cooking_gallery_screen.dart';
 
 class RecipeResultScreen extends StatelessWidget {
   const RecipeResultScreen({super.key});

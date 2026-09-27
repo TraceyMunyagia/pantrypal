@@ -1,4 +1,4 @@
-import 'recipe.dart';
+import 'recipe_model.dart';
 
 class ChatMessage {
   const ChatMessage({

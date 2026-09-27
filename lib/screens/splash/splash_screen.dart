@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'meal_planner_screen.dart';
+import '../auth/login_screen.dart';
+import '../home/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,7 +23,10 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     _navigationTimer = Timer(const Duration(milliseconds: 1200), () {
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(MealPlannerScreen.routeName);
+      final session = Supabase.instance.client.auth.currentSession;
+      Navigator.of(context).pushReplacementNamed(
+        session != null ? HomeScreen.routeName : LoginScreen.routeName,
+      );
     });
   }
 
@@ -33,13 +38,21 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Color(0xFFF97316),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.restaurant_menu, color: Colors.white, size: 72),
+            ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(28)),
+              child: Image.asset(
+                'assets/pantrypal_logo.png',
+                width: 180,
+                height: 180,
+                fit: BoxFit.cover,
+              ),
+            ),
             SizedBox(height: 18),
             Text(
               'PantryPal AI',

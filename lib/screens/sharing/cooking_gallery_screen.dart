@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/cooking_post.dart';
-import '../providers/cooking_post_provider.dart';
-import 'cooking_post_preview_screen.dart';
+import '../../models/cooking_post.dart';
+import '../../providers/cooking_post_provider.dart';
+import 'share_recipe_screen.dart';
 
 class CookingGalleryScreen extends StatelessWidget {
   const CookingGalleryScreen({super.key});

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'recipe.dart';
+import 'recipe_model.dart';
 
 class CookingPost {
   const CookingPost({

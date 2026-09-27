@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../models/recipe.dart';
+import '../models/recipe_model.dart';
 import '../providers/cooking_post_provider.dart';
-import '../screens/cooking_post_preview_screen.dart';
+import '../screens/sharing/share_recipe_screen.dart';
 
 class RecipeCard extends StatelessWidget {
   const RecipeCard({required this.recipe, required this.onFavorite, super.key});

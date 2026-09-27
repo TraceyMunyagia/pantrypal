@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../models/cooking_post.dart';
-import '../models/recipe.dart';
+import '../models/recipe_model.dart';
 import '../services/cooking_post_service.dart';
 
 class CookingPostProvider extends ChangeNotifier {

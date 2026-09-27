@@ -5,6 +5,7 @@ class MealPlanRequest {
     required this.ingredients,
     required this.goal,
     required this.budget,
+    this.foodBank = const {},
   });
 
   final int durationDays;
@@ -12,6 +13,7 @@ class MealPlanRequest {
   final List<String> ingredients;
   final String goal;
   final String budget;
+  final Map<String, List<String>> foodBank;
 }
 
 class MealPlan {
