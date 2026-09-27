@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/config/app_config.dart';
 import 'providers/cooking_post_provider.dart';
 import 'providers/recipe_provider.dart';
 import 'providers/meal_plan_provider.dart';
@@ -24,8 +25,8 @@ Future<void> main() async {
   await dotenv.load(fileName: '.env');
 
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
+    url: AppConfig.supabaseUrl,
+    publishableKey: AppConfig.supabasePublishableKey,
   );
 
   runApp(const PantryPalApp());
